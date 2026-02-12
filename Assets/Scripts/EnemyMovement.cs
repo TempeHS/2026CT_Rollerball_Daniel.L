@@ -3,7 +3,6 @@ using UnityEngine.AI;
 
 public class EnemyMovement : MonoBehaviour
 {
-
     public Transform player;
     private NavMeshAgent navMeshAgent;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -17,7 +16,7 @@ public class EnemyMovement : MonoBehaviour
     {
         if (player != null)
         {
-            navMeshAgent.SetDestination(player.Position);
+            navMeshAgent.SetDestination(player.position);
         }
     }
 }
