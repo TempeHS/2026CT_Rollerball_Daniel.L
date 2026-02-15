@@ -30,22 +30,32 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(movement * speed); 
     }
 
-    void OnMove (InputValue movementValue)
+    private void OnMove (InputValue movementValue)
     {
         Vector2 movementVector = movementValue.Get<Vector2>(); 
         movementX = movementVector.x; 
         movementY = movementVector.y; 
     }
 
-    void SetCountText() 
+    private void OnCollisionEnter(Collision collision)
     {
-        countText.text =  "Count: " + count.ToString();       
-        if(count >= 15) {
-            winTextObject.SetActive(true);        
+   if (collision.gameObject.CompareTag("Enemy")) {
+        Destroy(gameObject); 
+        winTextObject.gameObject.SetActive(true);
+        winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
         }
     }
 
-    void OnTriggerEnter(Collider other) 
+    private void SetCountText() 
+    {
+        countText.text =  "Count: " + count.ToString();       
+        if(count >= 15) {
+            winTextObject.SetActive(true);  
+            Destroy(GameObject.FindGameObjectWithTag("Enemy"));      
+        }
+    }
+
+    private void OnTriggerEnter(Collider other) 
     {
         if(other.gameObject.CompareTag("PickUp")) {
         other.gameObject.SetActive(false);
