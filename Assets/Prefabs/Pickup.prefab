@@ -134,7 +134,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1572be9b0906cd24fb0e49f1b57932c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectPrefab: {fileID: 1402223638710461488}
+  objectPrefab: {fileID: 0}
   spawnAmount: 1
   xMin: -10
   xMax: 10
