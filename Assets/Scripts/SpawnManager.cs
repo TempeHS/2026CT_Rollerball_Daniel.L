@@ -5,18 +5,16 @@ public class SpawnManager : MonoBehaviour
 {
     public GameObject objectPrefab;
     
-    public int spawnAmount = 10;
+    public int spawnAmount = 19;
     
-    public float xMin = -10f;
-    public float xMax = 10f;
-    public float zMin = -10f;
-    public float zMax = 10f;
+    public float xMin = -9.5f;
+    public float xMax = 9.5f;
+    public float zMin = -9.5f;
+    public float zMax = 9.5f;
     public float spawnY = 0.5f;
 
-    void Start()
-    {
-        SpawnObjects();
-    }
+void Awake() { Debug.Log("SpawnManager Awake on: " + gameObject.name); } 
+void Start() { Debug.Log("SpawnManager Start on: " + gameObject.name); SpawnObjects(); }
 
     void SpawnObjects()
     {
