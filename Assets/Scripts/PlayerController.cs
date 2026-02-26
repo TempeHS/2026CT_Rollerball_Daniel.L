@@ -21,6 +21,8 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent <Rigidbody>(); 
         count = 0;
 
+        restartButtonObject.SetActive(false);        
+
         SetCountText();
         winTextObject.SetActive(false);
     }
