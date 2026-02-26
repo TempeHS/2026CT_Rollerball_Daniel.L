@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 public class PlayerController : MonoBehaviour
@@ -8,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 0; 
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
+    public GameObject restartButtonObject;
 
     private Rigidbody rb; 
     private int count;
@@ -43,6 +45,7 @@ public class PlayerController : MonoBehaviour
         Destroy(gameObject); 
         winTextObject.gameObject.SetActive(true);
         winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+        restartButtonObject.SetActive(true);
         }
     }
 
@@ -51,6 +54,7 @@ public class PlayerController : MonoBehaviour
         countText.text =  "Count: " + count.ToString();       
         if(count >= 18  ) {
             winTextObject.SetActive(true);  
+            restartButtonObject.SetActive(true);
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));      
         }
     }
@@ -65,5 +69,11 @@ public class PlayerController : MonoBehaviour
         }
 
         
+    }
+
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }
