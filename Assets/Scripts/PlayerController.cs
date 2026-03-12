@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     public float speed = 0; 
     public TextMeshProUGUI countText;
     public GameObject winTextObject;
+    public Transform pickupParent;
 
     private Rigidbody rb; 
     private int count;
@@ -20,7 +21,7 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent <Rigidbody>(); 
         count = 0;
 
-        restartButtonObject.SetActive(false);        
+        //restartButtonObject.SetActive(false);        
 
         SetCountText();
         winTextObject.SetActive(false);
@@ -46,7 +47,9 @@ public class PlayerController : MonoBehaviour
         Destroy(gameObject); 
         winTextObject.gameObject.SetActive(true);
         winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
-        restartButtonObject.SetActive(true);
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        //restartButtonObject.SetActive(true); 
         }
     }
 
@@ -55,8 +58,11 @@ public class PlayerController : MonoBehaviour
         countText.text =  "Count: " + count.ToString();       
         if(count >= 18  ) {
             winTextObject.SetActive(true);  
-            restartButtonObject.SetActive(true);
+            //restartButtonObject.SetActive(true);
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));      
+            foreach (Transform child in pickupParent) {
+                Destroy(child.gameObject);
+            }
         }
     }
 

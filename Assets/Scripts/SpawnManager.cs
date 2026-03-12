@@ -2,9 +2,12 @@ using UnityEngine;
 using System.Collections.Generic;
 
 public class SpawnManager : MonoBehaviour
+
+
 {
     public GameObject objectPrefab;
-    
+    public Transform pickupParent;
+
     public int spawnAmount = 19;
     
     public float xMin = -9.5f;
@@ -13,20 +16,23 @@ public class SpawnManager : MonoBehaviour
     public float zMax = 9.5f;
     public float spawnY = 0.5f;
 
-void Awake() { Debug.Log("SpawnManager Awake on: " + gameObject.name); } 
-void Start() { Debug.Log("SpawnManager Start on: " + gameObject.name); SpawnObjects(); }
+    void Awake() { Debug.Log("SpawnManager Awake on: " + gameObject.name); } 
+    void Start() { Debug.Log("SpawnManager Start on: " + gameObject.name); SpawnObjects(); }
 
-    void SpawnObjects()
-    {
+    void SpawnObjects() {
         for (int i = 0; i < spawnAmount; i++)
         {
-            Vector3 spawnPosition = new Vector3(
-                Random.Range(xMin, xMax),
-                spawnY,
-                Random.Range(zMin, zMax)
-            );
+           Vector3 spawnPosition = new Vector3(
+               Random.Range(xMin, xMax),
+              spawnY,
+              Random.Range(zMin, zMax)
+          );
 
-            Instantiate(objectPrefab, spawnPosition, Quaternion.identity);
+          GameObject obj = Instantiate(objectPrefab, spawnPosition, Quaternion.identity);
+
+         obj.transform.SetParent(pickupParent);
         }
     }
 }
+
+
