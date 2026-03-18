@@ -15,6 +15,12 @@ public class PlayerController : MonoBehaviour
     private int count;
     private float movementX;
     private float movementY;
+    public float dangerHeightY = 2f;
+    public float dangerTimeLimit = 5f;
+    private float dangerTimer;
+
+    private bool isInDangerZone;
+    private bool isGameOver;
 
     void Start()
     {
@@ -22,6 +28,7 @@ public class PlayerController : MonoBehaviour
         count = 0;
 
         //restartButtonObject.SetActive(false);        
+        dangerTimer = dangerTimeLimit;
 
         SetCountText();
         winTextObject.SetActive(false);
