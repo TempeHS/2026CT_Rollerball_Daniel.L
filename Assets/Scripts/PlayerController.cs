@@ -5,134 +5,139 @@ using TMPro;
 
 public class PlayerController : MonoBehaviour
 {
-public float speed = 0f;
-public TextMeshProUGUI countText;
-public GameObject winTextObject;
-public Transform pickupParent;
+    [Header("UI")]
+    public TextMeshProUGUI countText;
+    public GameObject winTextObject;
 
-private Rigidbody rb;
-private int count;
-private float movementX;
-private float movementY;
+    [Header("Movement")]
+    public float speed = 0f;
+    public Transform pickupParent;
 
-public float dangerHeightY = 2f;
-public float dangerTimeLimit = 5f;
-private float dangerTimer;
+    [Header("Danger Zone")]
+    public float dangerHeightY = 2f;
+    public float dangerTimeLimit = 5f;
 
-private bool isInDangerZone;
-private bool isGameOver;
+    private Rigidbody rb;
+    private int count;
+    private float movementX;
+    private float movementY;
+    private float dangerTimer;
 
-private float baseSpeed;
-private bool isInvincible;
-private float invincibleUntil;
-private float speedBoostUntil;
+    private bool isInDangerZone;
+    private bool isGameOver;
 
-void Start()
-{
-rb = GetComponent<Rigidbody>();
-count = 0;
-baseSpeed = speed;
-dangerTimer = dangerTimeLimit;
+    private float baseSpeed;
+    private bool isInvincible;
+    private float invincibleUntil;
+    private float speedBoostUntil;
 
-SetCountText();
-winTextObject.SetActive(false);
-}
+    private void Start()
+    {
+        rb = GetComponent<Rigidbody>();
+        count = 0;
+        baseSpeed = speed;
+        dangerTimer = dangerTimeLimit;
 
-void Update()
-{
-if (isInvincible && Time.time >= invincibleUntil)
-{
-isInvincible = false;
-}
+        SetCountText();
+        winTextObject.SetActive(false);
+    }
 
-if (Time.time >= speedBoostUntil && speed != baseSpeed)
-{
-speed = baseSpeed;
-}
-}
+    private void Update()
+    {
+        if (isInvincible && Time.time >= invincibleUntil)
+        {
+            isInvincible = false;
+        }
 
-private void FixedUpdate()
-{
-Vector3 movement = new Vector3(movementX, 0.0f, movementY);
-rb.AddForce(movement * speed);
-}
+        if (Time.time >= speedBoostUntil && speed != baseSpeed)
+        {
+            speed = baseSpeed;
+        }
+    }
 
-private void OnMove(InputValue movementValue)
-{
-Vector2 movementVector = movementValue.Get<Vector2>();
-movementX = movementVector.x;
-movementY = movementVector.y;
-}
+    private void FixedUpdate()
+    {
+        Vector3 movement = new Vector3(movementX, 0.0f, movementY);
+        rb.AddForce(movement * speed);
+    }
 
-private void OnCollisionEnter(Collision collision)
-{
-if (collision.gameObject.CompareTag("Enemy"))
-{
-if (isInvincible)
-{
-return;
-}
+    private void OnMove(InputValue movementValue)
+    {
+        Vector2 movementVector = movementValue.Get<Vector2>();
+        movementX = movementVector.x;
+        movementY = movementVector.y;
+    }
 
-Destroy(gameObject);
-winTextObject.SetActive(true);
-winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
-SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-}
-}
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (isInvincible)
+            {
+                return;
+            }
 
-private void SetCountText()
-{
-countText.text = "Count: " + count;
-if (count >= 18)
-{
-winTextObject.SetActive(true);
-winTextObject.GetComponent<TextMeshProUGUI>().text = "You Win!";
-Destroy(GameObject.FindGameObjectWithTag("Enemy"));
+            Destroy(gameObject);
+            winTextObject.SetActive(true);
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+    }
 
-foreach (Transform child in pickupParent)
-{
-Destroy(child.gameObject);
-}
-}
-}
+    private void SetCountText()
+    {
+        countText.text = "Count: " + count;
+        if (count >= 18)
+        {
+            winTextObject.SetActive(true);
+            winTextObject.GetComponent<TextMeshProUGUI>().text = "You Win!";
+            Destroy(GameObject.FindGameObjectWithTag("Enemy"));
 
-private void OnTriggerEnter(Collider other)
-{
-if (other.gameObject.CompareTag("PickUp"))
-{
-other.gameObject.SetActive(false);
-count += 1;
-SetCountText();
-}
-}
+            foreach (Transform child in pickupParent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+    }
 
-public void RestartGame()
-{
-Time.timeScale = 1f;
-SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-}
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("PickUp"))
+        {
+            other.gameObject.SetActive(false);
+            count += 1;
+            SetCountText();
+        }
+    }
 
-public void ApplySpeedBoost(float duration)
-{
-speed = baseSpeed * 2f;
-speedBoostUntil = Time.time + duration;
-Debug.Log("BUFF: Speed boost");
-}
+    public void RestartGame()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
-public void ApplyInvincibility(float duration)
-{
-isInvincible = true;
-invincibleUntil = Time.time + duration;
-Debug.Log("BUFF: Invincibility");
-}
+    public void ApplySpeedBoost(float duration)
+    {
+        speed = baseSpeed * 2f;
+        speedBoostUntil = Time.time + duration;
+        Debug.Log("BUFF: Speed boost");
+    }
 
-public void ApplyEnemySpeedup(float duration)
-{
-EnemyMovement[] enemies = FindObjectsOfType<EnemyMovement>();
-foreach (EnemyMovement enemy in enemies)
-{
-enemy.SpeedUp(duration);
-}
-Debug.Log("DEBUFF: Enemy speed up");
+    public void ApplyInvincibility(float duration)
+    {
+        isInvincible = true;
+        invincibleUntil = Time.time + duration;
+        Debug.Log("BUFF: Invincibility");
+    }
+
+    public void ApplyEnemySpeedup(float duration)
+    {
+        EnemyMovement[] enemies = FindObjectsOfType<EnemyMovement>();
+        foreach (EnemyMovement enemy in enemies)
+        {
+            enemy.SpeedUp(duration);
+        }
+        Debug.Log("DEBUFF: Enemy speed up");
+    }
 }
 }

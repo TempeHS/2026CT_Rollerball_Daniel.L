@@ -4,18 +4,18 @@ using UnityEngine.AI;
 
 public class EnemyMovement : MonoBehaviour
 {
+    [Header("References")]
     public Transform player;
 
+    [Header("Spawning")]
+    public float extraEnemySpawnDelay = 5f;
+    public float extraEnemyHeightOffset = 2f;
+    public float despawnPlayerYThreshold = 1f;
 
-    private float extraEnemySpawnDelay = 5f;
-    private float extraEnemyHeightOffset = 2f;
-     private float despawnPlayerYThreshold = 1f;
-    private bool isSecondaryEnemyInstance = false;
-
-
-    private bool isFlyingEnemyInstance = false;
-    private float flyingEnemySpeed = 6f;
-    private float playerMoveThreshold = 0.05f;
+    [Header("Flying Mode")]
+    public bool isFlyingEnemyInstance = false;
+    public float flyingEnemySpeed = 6f;
+    public float playerMoveThreshold = 0.05f;
 
     private NavMeshAgent navMeshAgent;
     private Rigidbody rb;
@@ -28,30 +28,23 @@ public class EnemyMovement : MonoBehaviour
     private bool hasStartedChasing = false;
     private GameObject spawnedExtraEnemy;
     private bool spawnPending;
+    private bool isSecondaryEnemyInstance = false;
 
-    void Start()
+    private void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
 
         if (navMeshAgent != null)
-        {
             normalSpeed = navMeshAgent.speed;
-        }
 
         normalFlyingSpeed = flyingEnemySpeed;
-
-        if (player != null)
-        {
-            playerRb = player.GetComponent<Rigidbody>();
-        }
+        playerRb = player != null ? player.GetComponent<Rigidbody>() : null;
 
         if (isFlyingEnemyInstance)
         {
             if (navMeshAgent != null)
-            {
                 navMeshAgent.enabled = false;
-            }
 
             if (rb != null)
             {
@@ -60,32 +53,21 @@ public class EnemyMovement : MonoBehaviour
                 rb.angularVelocity = Vector3.zero;
             }
         }
-        else
-        {
-            if (navMeshAgent != null)
-            {
-                navMeshAgent.isStopped = true;
-            }
-        }
+        else if (navMeshAgent != null)
+            navMeshAgent.isStopped = true;
     }
 
-    void Update()
+    private void Update()
     {
         if (player == null)
-        {
             return;
-        }
 
         if (Time.time >= speedUpUntil)
         {
             if (isFlyingEnemyInstance)
-            {
                 flyingEnemySpeed = normalFlyingSpeed;
-            }
             else if (navMeshAgent != null && navMeshAgent.speed != normalSpeed)
-            {
                 navMeshAgent.speed = normalSpeed;
-            }
         }
 
         if (isFlyingEnemyInstance)
@@ -95,9 +77,7 @@ public class EnemyMovement : MonoBehaviour
         }
 
         if (playerRb == null || navMeshAgent == null)
-        {
             return;
-        }
 
         if (spawnedExtraEnemy != null && player.position.y < despawnPlayerYThreshold)
         {
@@ -106,14 +86,12 @@ public class EnemyMovement : MonoBehaviour
         }
 
         if (spawnedExtraEnemy == null && !spawnPending && player.position.y >= despawnPlayerYThreshold)
-        {
             StartCoroutine(SpawnExtraEnemyAfterDelay());
-        }
 
         if (!hasStartedChasing)
         {
-            bool playerMoved = playerRb.linearVelocity.sqrMagnitude >
-                               (playerMoveThreshold * playerMoveThreshold);
+            float playerMoveSqr = playerMoveThreshold * playerMoveThreshold;
+            bool playerMoved = playerRb.linearVelocity.sqrMagnitude > playerMoveSqr;
 
             if (!playerMoved)
             {
@@ -132,24 +110,16 @@ public class EnemyMovement : MonoBehaviour
     {
         Vector3 toPlayer = player.position - transform.position;
         if (toPlayer.sqrMagnitude < 0.0001f)
-        {
             return;
-        }
 
         Vector3 step = toPlayer.normalized * flyingEnemySpeed * Time.deltaTime;
         if (step.sqrMagnitude > toPlayer.sqrMagnitude)
-        {
             step = toPlayer;
-        }
 
         if (rb != null)
-        {
             rb.MovePosition(rb.position + step);
-        }
         else
-        {
             transform.position += step;
-        }
     }
 
     public void SpeedUp(float duration)
@@ -171,23 +141,21 @@ public class EnemyMovement : MonoBehaviour
         spawnPending = true;
         yield return new WaitForSeconds(extraEnemySpawnDelay);
 
-        if (this == null)
+        if (this == null || spawnedExtraEnemy != null || player == null || player.position.y < despawnPlayerYThreshold)
         {
+            spawnPending = false;
             yield break;
         }
 
-        if (spawnedExtraEnemy == null && player != null && player.position.y >= despawnPlayerYThreshold)
-        {
-            Vector3 spawnPos = transform.position + new Vector3(0f, extraEnemyHeightOffset, 0f);
-            spawnedExtraEnemy = Instantiate(gameObject, spawnPos, transform.rotation);
+        Vector3 spawnPos = transform.position + Vector3.up * extraEnemyHeightOffset;
+        spawnedExtraEnemy = Instantiate(gameObject, spawnPos, transform.rotation);
 
-            EnemyMovement extraEnemyMovement = spawnedExtraEnemy.GetComponent<EnemyMovement>();
-            if (extraEnemyMovement != null)
-            {
-                extraEnemyMovement.player = player;
-                extraEnemyMovement.isSecondaryEnemyInstance = true;
-                extraEnemyMovement.isFlyingEnemyInstance = true;
-            }
+        EnemyMovement extraEnemy = spawnedExtraEnemy.GetComponent<EnemyMovement>();
+        if (extraEnemy != null)
+        {
+            extraEnemy.player = player;
+            extraEnemy.isSecondaryEnemyInstance = true;
+            extraEnemy.isFlyingEnemyInstance = true;
         }
 
         spawnPending = false;

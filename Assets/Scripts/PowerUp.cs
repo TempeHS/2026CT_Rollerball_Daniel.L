@@ -1,11 +1,6 @@
 using UnityEngine;
 
-public enum PowerUpType
-{
-    PlayerSpeedBuff,
-    PlayerInvincibility,
-    EnemySpeedup
-}
+public enum PowerUpType { PlayerSpeedBuff, PlayerInvincibility, EnemySpeedup }
 
 public class PowerUp : MonoBehaviour
 {
@@ -24,48 +19,41 @@ public class PowerUp : MonoBehaviour
 
     private void Start()
     {
-        resolvedType = randomizeType
-            ? (PowerUpType)Random.Range(0, 3)
-            : fixedType;
-
+        resolvedType = randomizeType ? (PowerUpType)Random.Range(0, 3) : fixedType;
         ApplyVisual();
     }
 
     private void ApplyVisual()
     {
-        if (meshRenderer == null) return;
+        if (meshRenderer == null)
+            return;
 
-        Color c = speedColor;
-        switch (resolvedType)
+        Color color = resolvedType switch
         {
-            case PowerUpType.PlayerInvincibility:
-                c = invincibleColor;
-                break;
-            case PowerUpType.EnemySpeedup:
-                c = enemySpeedupColor;
-                break;
-        }
-
-        meshRenderer.material.color = c;
+            PowerUpType.PlayerInvincibility => invincibleColor,
+            PowerUpType.EnemySpeedup => enemySpeedupColor,
+            _ => speedColor
+        };
+        meshRenderer.material.color = color;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         PlayerController player = other.GetComponent<PlayerController>();
-        if (player == null) return;
+        if (player == null)
+            return;
 
         switch (resolvedType)
         {
             case PowerUpType.PlayerSpeedBuff:
                 player.ApplySpeedBoost(duration);
                 break;
-
             case PowerUpType.PlayerInvincibility:
                 player.ApplyInvincibility(duration);
                 break;
-
             case PowerUpType.EnemySpeedup:
                 player.ApplyEnemySpeedup(duration);
                 break;

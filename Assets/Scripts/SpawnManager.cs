@@ -4,19 +4,13 @@ public class SpawnManager : MonoBehaviour
 {
     [Header("Prefabs")]
     public GameObject objectPrefab;
-    public GameObject powerUpPrefab; // maybe later
+    public GameObject powerUpPrefab;
     public Transform pickupParent;
 
-    [Header("Amounts")]
+    [Header("Spawn Volume")]
     public int spawnAmount = 19;
     public int powerUpAmount = 4;
-
-    [Header("Spawn Area")]
-    public float xMin = -9.5f;
-    public float xMax = 9.5f;
-    public float zMin = -9.5f;
-    public float zMax = 9.5f;
-    public float spawnY = 0.5f;
+    public float xMin = -9.5f, xMax = 9.5f, zMin = -9.5f, zMax = 9.5f, spawnY = 0.5f;
 
     [Header("Collision Check")]
     [Min(0.05f)] public float spawnCheckRadius = 0.45f;
@@ -25,44 +19,26 @@ public class SpawnManager : MonoBehaviour
 
     private void Start()
     {
-        SpawnPickups();
-        SpawnPowerUps();
+        SpawnObjects(objectPrefab, spawnAmount, pickupParent);
+        SpawnObjects(powerUpPrefab, powerUpAmount, null);
     }
 
-    private void SpawnPickups()
+    private void SpawnObjects(GameObject prefab, int count, Transform parent)
     {
-        for (int i = 0; i < spawnAmount; i++)
-        {
-            if (!TryGetValidSpawnPosition(out Vector3 spawnPosition))
-            {
-                Debug.LogWarning("SpawnManager: Could not find free position for pickup.");
-                continue;
-            }
-
-            GameObject obj = Instantiate(objectPrefab, spawnPosition, Quaternion.identity);
-            if (pickupParent != null)
-            {
-                obj.transform.SetParent(pickupParent);
-            }
-        }
-    }
-
-    private void SpawnPowerUps()
-    {
-        if (powerUpPrefab == null)
-        {
+        if (prefab == null)
             return;
-        }
 
-        for (int i = 0; i < powerUpAmount; i++)
+        for (int i = 0; i < count; i++)
         {
-            if (!TryGetValidSpawnPosition(out Vector3 spawnPosition))
+            if (!TryGetValidSpawnPosition(out Vector3 pos))
             {
-                Debug.LogWarning("SpawnManager: Could not find free position for power-up.");
+                Debug.LogWarning($"SpawnManager: Could not spawn {prefab.name} (attempt {i + 1}/{count})");
                 continue;
             }
 
-            Instantiate(powerUpPrefab, spawnPosition, Quaternion.identity);
+            GameObject obj = Instantiate(prefab, pos, Quaternion.identity);
+            if (parent != null)
+                obj.transform.SetParent(parent);
         }
     }
 
@@ -71,15 +47,7 @@ public class SpawnManager : MonoBehaviour
         for (int attempt = 0; attempt < maxSpawnAttempts; attempt++)
         {
             Vector3 candidate = GetRandomPosition();
-
-            bool blocked = Physics.CheckSphere(
-                candidate,
-                spawnCheckRadius,
-                blockedSpawnLayers,
-                QueryTriggerInteraction.Ignore
-            );
-
-            if (!blocked)
+            if (!Physics.CheckSphere(candidate, spawnCheckRadius, blockedSpawnLayers, QueryTriggerInteraction.Ignore))
             {
                 spawnPosition = candidate;
                 return true;
@@ -90,12 +58,5 @@ public class SpawnManager : MonoBehaviour
         return false;
     }
 
-    private Vector3 GetRandomPosition()
-    {
-        return new Vector3(
-            Random.Range(xMin, xMax),
-            spawnY,
-            Random.Range(zMin, zMax)
-        );
-    }
+    private Vector3 GetRandomPosition() => new(Random.Range(xMin, xMax), spawnY, Random.Range(zMin, zMax));
 }
