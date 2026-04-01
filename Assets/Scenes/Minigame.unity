@@ -575,6 +575,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 1531738864}
+  extraEnemySpawnDelay: 5
+  extraEnemyHeightOffset: 2
+  despawnPlayerYThreshold: 1
+  isFlyingEnemyInstance: 0
+  flyingEnemySpeed: 6
+  playerMoveThreshold: 0.05
 --- !u!195 &162458234
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -2619,7 +2625,7 @@ Transform:
   m_GameObject: {fileID: 1011785747}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -500, y: -150, z: -500}
+  m_LocalPosition: {x: -700, y: -150, z: -200}
   m_LocalScale: {x: 0.3, y: 0.3, z: 0.3}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -3360,9 +3366,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0beb2e364ca6724bb54f9b0a8ffecf1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 25
   countText: {fileID: 2014803603}
   winTextObject: {fileID: 816179670}
+  speed: 25
   pickupParent: {fileID: 494815948}
   dangerHeightY: 2
   dangerTimeLimit: 5

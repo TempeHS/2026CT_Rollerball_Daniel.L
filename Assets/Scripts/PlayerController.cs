@@ -140,4 +140,3 @@ public class PlayerController : MonoBehaviour
         Debug.Log("DEBUFF: Enemy speed up");
     }
 }
-}
