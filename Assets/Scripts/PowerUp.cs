@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public enum PowerUpType { PlayerSpeedBuff, PlayerInvincibility, EnemySpeedup }
+public enum PowerUpType { PlayerSpeedBuff }
 
 public class PowerUp : MonoBehaviour
 {
@@ -12,14 +12,12 @@ public class PowerUp : MonoBehaviour
     [Header("Visuals")]
     public Renderer meshRenderer;
     public Color speedColor = Color.cyan;
-    public Color invincibleColor = Color.yellow;
-    public Color enemySpeedupColor = Color.red;
 
     private PowerUpType resolvedType;
 
     private void Start()
     {
-        resolvedType = randomizeType ? (PowerUpType)Random.Range(0, 3) : fixedType;
+        resolvedType = PowerUpType.PlayerSpeedBuff;
         ApplyVisual();
     }
 
@@ -28,13 +26,7 @@ public class PowerUp : MonoBehaviour
         if (meshRenderer == null)
             return;
 
-        Color color = resolvedType switch
-        {
-            PowerUpType.PlayerInvincibility => invincibleColor,
-            PowerUpType.EnemySpeedup => enemySpeedupColor,
-            _ => speedColor
-        };
-        meshRenderer.material.color = color;
+        meshRenderer.material.color = speedColor;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -46,18 +38,7 @@ public class PowerUp : MonoBehaviour
         if (player == null)
             return;
 
-        switch (resolvedType)
-        {
-            case PowerUpType.PlayerSpeedBuff:
-                player.ApplySpeedBoost(duration);
-                break;
-            case PowerUpType.PlayerInvincibility:
-                player.ApplyInvincibility(duration);
-                break;
-            case PowerUpType.EnemySpeedup:
-                player.ApplyEnemySpeedup(duration);
-                break;
-        }
+        player.ApplySpeedBoost(duration);
 
         Destroy(gameObject);
     }

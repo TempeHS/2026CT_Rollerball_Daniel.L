@@ -21,10 +21,6 @@ public class EnemyMovement : MonoBehaviour
     private Rigidbody rb;
     private Rigidbody playerRb;
 
-    private float normalSpeed;
-    private float normalFlyingSpeed;
-    private float speedUpUntil;
-
     private bool hasStartedChasing = false;
     private GameObject spawnedExtraEnemy;
     private bool spawnPending;
@@ -34,11 +30,6 @@ public class EnemyMovement : MonoBehaviour
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
-
-        if (navMeshAgent != null)
-            normalSpeed = navMeshAgent.speed;
-
-        normalFlyingSpeed = flyingEnemySpeed;
         playerRb = player != null ? player.GetComponent<Rigidbody>() : null;
 
         if (isFlyingEnemyInstance)
@@ -61,14 +52,6 @@ public class EnemyMovement : MonoBehaviour
     {
         if (player == null)
             return;
-
-        if (Time.time >= speedUpUntil)
-        {
-            if (isFlyingEnemyInstance)
-                flyingEnemySpeed = normalFlyingSpeed;
-            else if (navMeshAgent != null && navMeshAgent.speed != normalSpeed)
-                navMeshAgent.speed = normalSpeed;
-        }
 
         if (isFlyingEnemyInstance)
         {
@@ -120,20 +103,6 @@ public class EnemyMovement : MonoBehaviour
             rb.MovePosition(rb.position + step);
         else
             transform.position += step;
-    }
-
-    public void SpeedUp(float duration)
-    {
-        if (isFlyingEnemyInstance)
-        {
-            flyingEnemySpeed = normalFlyingSpeed * 1.5f;
-        }
-        else if (navMeshAgent != null)
-        {
-            navMeshAgent.speed = normalSpeed * 1.5f;
-        }
-
-        speedUpUntil = Time.time + duration;
     }
 
     private IEnumerator SpawnExtraEnemyAfterDelay()

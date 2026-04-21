@@ -10,7 +10,7 @@ public class PlayerController : MonoBehaviour
     public GameObject winTextObject;
 
     [Header("Movement")]
-    public float speed = 0f;
+    public float speed = 20f;
     public Transform pickupParent;
 
     [Header("Danger Zone")]
@@ -27,8 +27,6 @@ public class PlayerController : MonoBehaviour
     private bool isGameOver;
 
     private float baseSpeed;
-    private bool isInvincible;
-    private float invincibleUntil;
     private float speedBoostUntil;
 
     private void Start()
@@ -44,11 +42,6 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (isInvincible && Time.time >= invincibleUntil)
-        {
-            isInvincible = false;
-        }
-
         if (Time.time >= speedBoostUntil && speed != baseSpeed)
         {
             speed = baseSpeed;
@@ -72,11 +65,6 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            if (isInvincible)
-            {
-                return;
-            }
-
             Destroy(gameObject);
             winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
@@ -121,22 +109,5 @@ public class PlayerController : MonoBehaviour
         speed = baseSpeed * 2f;
         speedBoostUntil = Time.time + duration;
         Debug.Log("BUFF: Speed boost");
-    }
-
-    public void ApplyInvincibility(float duration)
-    {
-        isInvincible = true;
-        invincibleUntil = Time.time + duration;
-        Debug.Log("BUFF: Invincibility");
-    }
-
-    public void ApplyEnemySpeedup(float duration)
-    {
-        EnemyMovement[] enemies = FindObjectsOfType<EnemyMovement>();
-        foreach (EnemyMovement enemy in enemies)
-        {
-            enemy.SpeedUp(duration);
-        }
-        Debug.Log("DEBUFF: Enemy speed up");
     }
 }
