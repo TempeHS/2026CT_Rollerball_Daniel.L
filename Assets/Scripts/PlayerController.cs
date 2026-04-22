@@ -2,11 +2,13 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections.Generic;
 
 public class PlayerController : MonoBehaviour
 {
     [Header("UI")]
     public TextMeshProUGUI countText;
+    public TextMeshProUGUI stopwatchText;
     public GameObject winTextObject;
 
     [Header("Movement")]
@@ -26,8 +28,10 @@ public class PlayerController : MonoBehaviour
     private bool isInDangerZone;
     private bool isGameOver;
 
+    private float elapsedTime;
+
     private float baseSpeed;
-    private float speedBoostUntil;
+    private readonly List<float> speedBoostEndTimes = new();
 
     private void Start()
     {
@@ -35,17 +39,33 @@ public class PlayerController : MonoBehaviour
         count = 0;
         baseSpeed = speed;
         dangerTimer = dangerTimeLimit;
+        elapsedTime = 0f;
 
         SetCountText();
         winTextObject.SetActive(false);
+        UpdateStopwatchText();
     }
 
     private void Update()
     {
-        if (Time.time >= speedBoostUntil && speed != baseSpeed)
+        if (!isGameOver)
         {
-            speed = baseSpeed;
+            elapsedTime += Time.deltaTime;
+            UpdateStopwatchText();
         }
+
+        for (int i = speedBoostEndTimes.Count - 1; i >= 0; i--)
+        {
+            if (Time.time >= speedBoostEndTimes[i])
+                speedBoostEndTimes.RemoveAt(i);
+        }
+
+        UpdateSpeedFromBoostStacks();
+    }
+
+    private void UpdateSpeedFromBoostStacks()
+    {
+        speed = baseSpeed * Mathf.Pow(2f, speedBoostEndTimes.Count);
     }
 
     private void FixedUpdate()
@@ -65,6 +85,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Enemy"))
         {
+            isGameOver = true;
             Destroy(gameObject);
             winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
@@ -77,6 +98,7 @@ public class PlayerController : MonoBehaviour
         countText.text = "Count: " + count;
         if (count >= 18)
         {
+            isGameOver = true;
             winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Win!";
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
@@ -86,6 +108,17 @@ public class PlayerController : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+    }
+
+    private void UpdateStopwatchText()
+    {
+        if (stopwatchText == null)
+            return;
+
+        int totalSeconds = Mathf.FloorToInt(elapsedTime);
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+        stopwatchText.text = $"Time: {minutes:00}:{seconds:00}";
     }
 
     private void OnTriggerEnter(Collider other)
@@ -106,8 +139,8 @@ public class PlayerController : MonoBehaviour
 
     public void ApplySpeedBoost(float duration)
     {
-        speed = baseSpeed * 2f;
-        speedBoostUntil = Time.time + duration;
-        Debug.Log("BUFF: Speed boost");
+        speedBoostEndTimes.Add(Time.time + duration);
+        UpdateSpeedFromBoostStacks();
+        Debug.Log($"BUFF: Speed boost stacks = {speedBoostEndTimes.Count}");
     }
 }

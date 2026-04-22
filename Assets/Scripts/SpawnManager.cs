@@ -5,11 +5,14 @@ public class SpawnManager : MonoBehaviour
     [Header("Prefabs")]
     public GameObject objectPrefab;
     public GameObject powerUpPrefab;
+    public GameObject dynamicObjectPrefab;
     public Transform pickupParent;
+    public Transform objectsParent;
 
     [Header("Spawn Volume")]
     public int spawnAmount = 19;
     public int powerUpAmount = 4;
+    public int dynamicObjectAmount = 4;
     public float xMin = -9.5f, xMax = 9.5f, zMin = -9.5f, zMax = 9.5f, spawnY = 0.5f;
 
     [Header("Collision Check")]
@@ -20,7 +23,8 @@ public class SpawnManager : MonoBehaviour
     private void Start()
     {
         SpawnObjects(objectPrefab, spawnAmount, pickupParent);
-        SpawnObjects(powerUpPrefab, powerUpAmount, null);
+        SpawnObjects(powerUpPrefab, powerUpAmount, pickupParent);
+        SpawnObjects(dynamicObjectPrefab, dynamicObjectAmount, objectsParent);
     }
 
     private void SpawnObjects(GameObject prefab, int count, Transform parent)
