@@ -9,7 +9,9 @@ public class PlayerController : MonoBehaviour
     [Header("UI")]
     public TextMeshProUGUI countText;
     public TextMeshProUGUI stopwatchText;
+    public TextMeshProUGUI buffText;
     public GameObject winTextObject;
+    public GameObject restartButtonObject;
 
     [Header("Movement")]
     public float speed = 20f;
@@ -32,6 +34,7 @@ public class PlayerController : MonoBehaviour
 
     private float baseSpeed;
     private readonly List<float> speedBoostEndTimes = new();
+    private float slowEnemyBuffEndTime;
 
     private void Start()
     {
@@ -43,7 +46,12 @@ public class PlayerController : MonoBehaviour
 
         SetCountText();
         winTextObject.SetActive(false);
+        if (restartButtonObject != null)
+            restartButtonObject.SetActive(false);
         UpdateStopwatchText();
+
+        if (buffText != null)
+            UpdateBuffStatusText();
     }
 
     private void Update()
@@ -61,6 +69,7 @@ public class PlayerController : MonoBehaviour
         }
 
         UpdateSpeedFromBoostStacks();
+        UpdateBuffStatusText();
     }
 
     private void UpdateSpeedFromBoostStacks()
@@ -89,7 +98,8 @@ public class PlayerController : MonoBehaviour
             Destroy(gameObject);
             winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Lose!";
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            if (restartButtonObject != null)
+                restartButtonObject.SetActive(true);
         }
     }
 
@@ -101,6 +111,8 @@ public class PlayerController : MonoBehaviour
             isGameOver = true;
             winTextObject.SetActive(true);
             winTextObject.GetComponent<TextMeshProUGUI>().text = "You Win!";
+            if (restartButtonObject != null)
+                restartButtonObject.SetActive(true);
             Destroy(GameObject.FindGameObjectWithTag("Enemy"));
 
             foreach (Transform child in pickupParent)
@@ -139,8 +151,60 @@ public class PlayerController : MonoBehaviour
 
     public void ApplySpeedBoost(float duration)
     {
-        speedBoostEndTimes.Add(Time.time + duration);
+        // Add a new stack and refresh ALL stacks to the new end time
+        float newEndTime = Time.time + duration;
+        speedBoostEndTimes.Add(newEndTime);
+
+        // Refresh all existing stacks to the same end time
+        for (int i = 0; i < speedBoostEndTimes.Count; i++)
+            speedBoostEndTimes[i] = newEndTime;
+
         UpdateSpeedFromBoostStacks();
-        Debug.Log($"BUFF: Speed boost stacks = {speedBoostEndTimes.Count}");
+        UpdateBuffStatusText();
+        Debug.Log($"BUFF: Speed Boost (stacks: {speedBoostEndTimes.Count})");
+    }
+
+    public void ApplySlowEnemyBuff(float duration, float multiplier)
+    {
+        slowEnemyBuffEndTime = Time.time + duration;
+
+        EnemyMovement[] enemies = FindObjectsByType<EnemyMovement>(FindObjectsSortMode.None);
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i] != null)
+                enemies[i].ApplySlow(multiplier, duration);
+        }
+
+        UpdateBuffStatusText();
+        Debug.Log("BUFF: Slow Enemy (active)");
+    }
+
+    private void UpdateBuffStatusText()
+    {
+        if (buffText == null)
+            return;
+
+        int speedStacks = speedBoostEndTimes.Count;
+        float speedRemaining = 0f;
+        float slowRemaining = Mathf.Max(0f, slowEnemyBuffEndTime - Time.time);
+
+        // All stacks share the same end time now, so just check the first one
+        if (speedStacks > 0)
+            speedRemaining = Mathf.Max(0f, speedBoostEndTimes[0] - Time.time);
+
+        // Build display lines for each active buff
+        string result = "";
+
+        if (speedStacks > 0 && speedRemaining > 0f)
+            result += $"Speed Boost x{speedStacks}: {speedRemaining:0.0}s";
+
+        if (slowRemaining > 0f)
+        {
+            if (result.Length > 0)
+                result += "\n";
+            result += $"Slow Enemy: {slowRemaining:0.0}s";
+        }
+
+        buffText.text = result;
     }
 }

@@ -24,13 +24,22 @@ public class EnemyMovement : MonoBehaviour
     private bool hasStartedChasing = false;
     private GameObject spawnedExtraEnemy;
     private bool spawnPending;
-    private bool isSecondaryEnemyInstance = false;
+
+    private float baseNavSpeed;
+    private float baseFlyingSpeed;
+    private float slowUntilTime;
+    private float currentSlowMultiplier = 1f;
 
     private void Start()
     {
         navMeshAgent = GetComponent<NavMeshAgent>();
         rb = GetComponent<Rigidbody>();
         playerRb = player != null ? player.GetComponent<Rigidbody>() : null;
+
+        // Store baseline speeds
+        if (navMeshAgent != null)
+            baseNavSpeed = navMeshAgent.speed;
+        baseFlyingSpeed = flyingEnemySpeed;
 
         if (isFlyingEnemyInstance)
         {
@@ -52,6 +61,8 @@ public class EnemyMovement : MonoBehaviour
     {
         if (player == null)
             return;
+
+        UpdateSlowState();
 
         if (isFlyingEnemyInstance)
         {
@@ -105,6 +116,22 @@ public class EnemyMovement : MonoBehaviour
             transform.position += step;
     }
 
+    public void ApplySlow(float multiplier, float duration)
+    {
+        currentSlowMultiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
+        slowUntilTime = Time.time + duration;
+    }
+
+    private void UpdateSlowState()
+    {
+        float activeMultiplier = Time.time < slowUntilTime ? currentSlowMultiplier : 1f;
+
+        if (navMeshAgent != null)
+            navMeshAgent.speed = baseNavSpeed * activeMultiplier;
+
+        flyingEnemySpeed = baseFlyingSpeed * activeMultiplier;
+    }
+
     private IEnumerator SpawnExtraEnemyAfterDelay()
     {
         spawnPending = true;
@@ -123,7 +150,6 @@ public class EnemyMovement : MonoBehaviour
         if (extraEnemy != null)
         {
             extraEnemy.player = player;
-            extraEnemy.isSecondaryEnemyInstance = true;
             extraEnemy.isFlyingEnemyInstance = true;
         }
 

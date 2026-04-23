@@ -1,32 +1,27 @@
 using UnityEngine;
 
-public enum PowerUpType { PlayerSpeedBuff }
+public enum PowerUpType { PlayerSpeedBuff, SlowEnemy }
 
 public class PowerUp : MonoBehaviour
 {
     [Header("Settings")]
-    public float duration = 6f;
+    public float duration = 5f;
     public bool randomizeType = true;
     public PowerUpType fixedType = PowerUpType.PlayerSpeedBuff;
-
-    [Header("Visuals")]
-    public Renderer meshRenderer;
-    public Color speedColor = Color.cyan;
+    [Range(0.1f, 1f)] public float slowMultiplier = 0.5f;
 
     private PowerUpType resolvedType;
 
     private void Start()
     {
-        resolvedType = PowerUpType.PlayerSpeedBuff;
-        ApplyVisual();
-    }
-
-    private void ApplyVisual()
-    {
-        if (meshRenderer == null)
-            return;
-
-        meshRenderer.material.color = speedColor;
+        if (randomizeType)
+        {
+            resolvedType = Random.value < 0.75f ? PowerUpType.PlayerSpeedBuff : PowerUpType.SlowEnemy;
+        }
+        else
+        {
+            resolvedType = fixedType;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -38,7 +33,15 @@ public class PowerUp : MonoBehaviour
         if (player == null)
             return;
 
-        player.ApplySpeedBoost(duration);
+        switch (resolvedType)
+        {
+            case PowerUpType.PlayerSpeedBuff:
+                player.ApplySpeedBoost(duration);
+                break;
+            case PowerUpType.SlowEnemy:
+                player.ApplySlowEnemyBuff(duration, slowMultiplier);
+                break;
+        }
 
         Destroy(gameObject);
     }
